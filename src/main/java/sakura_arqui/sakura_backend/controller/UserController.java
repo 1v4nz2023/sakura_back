@@ -1,0 +1,84 @@
+package sakura_arqui.sakura_backend.controller;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import sakura_arqui.sakura_backend.dto.UserDto;
+import sakura_arqui.sakura_backend.model.User;
+import sakura_arqui.sakura_backend.service.UserService;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/users")
+@RequiredArgsConstructor
+public class UserController {
+    
+    private final UserService userService;
+    
+    @GetMapping
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userService.findAll();
+        return ResponseEntity.ok(users);
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Integer id) {
+        return userService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @GetMapping("/username/{username}")
+    public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
+        return userService.findByUsername(username)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @PostMapping
+    public ResponseEntity<User> createUser(@Valid @RequestBody UserDto userDto) {
+        User createdUser = userService.createUser(userDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+    }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Integer id, @Valid @RequestBody UserDto userDto) {
+        User updatedUser = userService.update(id, userDto);
+        return ResponseEntity.ok(updatedUser);
+    }
+    
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
+        userService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+    
+    @GetMapping("/role/{role}")
+    public ResponseEntity<List<User>> getUsersByRole(@PathVariable User.UserRole role) {
+        List<User> users = userService.findByRole(role);
+        return ResponseEntity.ok(users);
+    }
+    
+    @GetMapping("/active")
+    public ResponseEntity<List<User>> getActiveUsers() {
+        List<User> users = userService.findActiveUsers();
+        return ResponseEntity.ok(users);
+    }
+    
+    @GetMapping("/exists/{username}")
+    public ResponseEntity<Boolean> checkUsernameExists(@PathVariable String username) {
+        boolean exists = userService.existsByUsername(username);
+        return ResponseEntity.ok(exists);
+    }
+    
+    @PutMapping("/{id}/password")
+    public ResponseEntity<Boolean> changePassword(@PathVariable Integer id, 
+                                                 @RequestParam String oldPassword, 
+                                                 @RequestParam String newPassword) {
+        boolean changed = userService.changePassword(id, oldPassword, newPassword);
+        return ResponseEntity.ok(changed);
+    }
+} 
