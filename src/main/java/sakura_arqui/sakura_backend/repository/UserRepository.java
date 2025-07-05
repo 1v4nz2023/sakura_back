@@ -27,4 +27,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findByUsernameContainingOrRole(@Param("searchTerm") String searchTerm, @Param("role") User.UserRole role);
     
     boolean existsByUsername(String username);
+
+    Optional<User> findByEmail(String email);
 } 

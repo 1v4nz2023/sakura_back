@@ -8,8 +8,10 @@ import org.springframework.web.bind.annotation.*;
 import sakura_arqui.sakura_backend.dto.UserDto;
 import sakura_arqui.sakura_backend.model.User;
 import sakura_arqui.sakura_backend.service.UserService;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -80,5 +82,13 @@ public class UserController {
                                                  @RequestParam String newPassword) {
         boolean changed = userService.changePassword(id, oldPassword, newPassword);
         return ResponseEntity.ok(changed);
+    }
+
+    @GetMapping("/username")
+    public ResponseEntity<?> getCurrentUsername(Authentication authentication) {
+        if (authentication != null && authentication.getPrincipal() instanceof sakura_arqui.sakura_backend.model.User user) {
+            return ResponseEntity.ok(Map.of("username", user.getUsername()));
+        }
+        return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
     }
 } 

@@ -121,4 +121,10 @@ public class UserServiceImpl implements UserService {
         }
         return false;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
 } 
