@@ -22,8 +22,7 @@ public class UserDto {
     @NotBlank(message = "Password is required")
     private String passwordHash;
     
-    @NotNull(message = "Role is required")
-    private User.UserRole role;
+    private Integer rolId;
     
     private Boolean isActive = true;
     

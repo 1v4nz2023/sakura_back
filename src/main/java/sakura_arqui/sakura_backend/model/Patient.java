@@ -26,14 +26,31 @@ public class Patient {
     @Column(name = "last_name", nullable = false, length = 80)
     private String lastName;
     
-    @Column(name = "dni", unique = true, length = 8)
+    @Column(name = "doc_number", unique = true, length = 8)
     private String dni;
+
+    @Column(name = "birth_date")
+    private LocalDateTime birthDate;
+
+    @ManyToOne
+    @JoinColumn(name = "tipo_documento_id", nullable = false)
+    private TipoDocumento tipoDocumento;
+
+    @ManyToOne
+    @JoinColumn(name = "gender_id", nullable = false)
+    private Gender gender;
+
+    @ManyToOne
+    @JoinColumn(name = "district_id", nullable = false)
+    private District district;
     
     @Column(name = "phone", length = 20)
-    private String phone;
+    private String phoneNumber;
     
     @Column(name = "email", length = 120)
     private String email;
+
+    private boolean status;
     
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

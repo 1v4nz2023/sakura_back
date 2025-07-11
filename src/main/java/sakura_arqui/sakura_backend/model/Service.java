@@ -27,4 +27,12 @@ public class Service {
     
     @Column(name = "base_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal basePrice;
+    private boolean status;
+
+    // -----------------------------------
+    // Cada servicio pertenece a UNA categoría
+    // -----------------------------------
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "categorie_service_id", nullable = false)
+    private CategorieService category;
 } 

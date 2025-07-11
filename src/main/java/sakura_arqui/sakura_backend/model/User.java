@@ -30,9 +30,13 @@ public class User {
     @Column(name = "email", nullable = false, unique = true, length = 120)
     private String email;
     
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
-    private UserRole role;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Rol rol;
+    
+    @OneToOne
+    @JoinColumn(name = "employee_id")
+    private Employee employee;
     
     @Column(name = "is_active")
     private Boolean isActive = true;
@@ -47,8 +51,4 @@ public class User {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-    
-    public enum UserRole {
-        ADMIN, CAJA, ODONTOLOGO
-    }
 } 

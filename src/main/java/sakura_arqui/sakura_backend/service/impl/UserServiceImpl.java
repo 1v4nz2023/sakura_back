@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sakura_arqui.sakura_backend.dto.UserDto;
 import sakura_arqui.sakura_backend.exception.ResourceNotFoundException;
+import sakura_arqui.sakura_backend.model.Rol;
 import sakura_arqui.sakura_backend.model.User;
+import sakura_arqui.sakura_backend.repository.RolRepository;
 import sakura_arqui.sakura_backend.repository.UserRepository;
 import sakura_arqui.sakura_backend.service.UserService;
 
@@ -20,6 +22,7 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
     
     private final UserRepository userRepository;
+    private final RolRepository rolRepository;
     private final PasswordEncoder passwordEncoder;
     
     @Override
@@ -54,7 +57,8 @@ public class UserServiceImpl implements UserService {
         if (userDto.getPasswordHash() != null && !userDto.getPasswordHash().isEmpty()) {
             user.setPasswordHash(passwordEncoder.encode(userDto.getPasswordHash()));
         }
-        user.setRole(userDto.getRole());
+        user.setRol(rolRepository.findById(userDto.getRolId())
+                .orElseThrow(() -> new ResourceNotFoundException("Rol not found with id: " + userDto.getRolId())));
         user.setIsActive(userDto.getIsActive());
         
         return userRepository.save(user);
@@ -70,8 +74,10 @@ public class UserServiceImpl implements UserService {
     
     @Override
     @Transactional(readOnly = true)
-    public List<User> findByRole(User.UserRole role) {
-        return userRepository.findByRole(role);
+    public List<User> findByRole(Integer rolId) {
+        Rol rol = rolRepository.findById(rolId)
+            .orElseThrow(() -> new ResourceNotFoundException("Rol not found with id: " + rolId));
+        return userRepository.findByRol(rol);
     }
     
     @Override
@@ -103,7 +109,8 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setUsername(userDto.getUsername());
         user.setPasswordHash(passwordEncoder.encode(userDto.getPasswordHash()));
-        user.setRole(userDto.getRole());
+        user.setRol(rolRepository.findById(userDto.getRolId())
+                .orElseThrow(() -> new ResourceNotFoundException("Rol not found with id: " + userDto.getRolId())));
         user.setIsActive(userDto.getIsActive() != null ? userDto.getIsActive() : true);
         
         return userRepository.save(user);

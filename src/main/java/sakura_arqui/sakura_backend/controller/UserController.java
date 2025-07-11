@@ -58,9 +58,9 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
     
-    @GetMapping("/role/{role}")
-    public ResponseEntity<List<User>> getUsersByRole(@PathVariable User.UserRole role) {
-        List<User> users = userService.findByRole(role);
+    @GetMapping("/role/{rolId}")
+    public ResponseEntity<List<User>> getUsersByRole(@PathVariable Integer rolId) {
+        List<User> users = userService.findByRole(rolId);
         return ResponseEntity.ok(users);
     }
     

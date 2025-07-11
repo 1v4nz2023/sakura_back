@@ -51,7 +51,7 @@ public class PatientServiceImpl implements PatientService {
         patient.setFirstName(patientDto.getFirstName());
         patient.setLastName(patientDto.getLastName());
         patient.setDni(patientDto.getDni());
-        patient.setPhone(patientDto.getPhone());
+        patient.setPhoneNumber(patientDto.getPhone());
         patient.setEmail(patientDto.getEmail());
         
         return patientRepository.save(patient);
@@ -103,7 +103,7 @@ public class PatientServiceImpl implements PatientService {
         patient.setFirstName(patientDto.getFirstName());
         patient.setLastName(patientDto.getLastName());
         patient.setDni(patientDto.getDni());
-        patient.setPhone(patientDto.getPhone());
+        patient.setPhoneNumber(patientDto.getPhone());
         patient.setEmail(patientDto.getEmail());
         
         return patientRepository.save(patient);

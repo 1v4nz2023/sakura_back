@@ -22,7 +22,7 @@ public interface UserService {
     
     void deleteById(Integer id);
     
-    List<User> findByRole(User.UserRole role);
+    List<User> findByRole(Integer rolId);
     
     List<User> findActiveUsers();
     

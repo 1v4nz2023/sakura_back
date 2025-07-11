@@ -39,7 +39,7 @@ public class AuthController {
                 .filter(user -> passwordEncoder.matches(loginRequest.getPassword(), user.getPasswordHash()))
                 .map(user -> {
                     userService.updateLastLogin(user.getUserId());
-                    String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name(), user.getUserId());
+                    String token = jwtUtil.generateToken(user.getUsername(), user.getRol().getName(), user.getUserId());
                     ResponseCookie cookie = ResponseCookie.from("token", token)
                         .httpOnly(true)
                         .secure(false) // set to true in production (HTTPS)
