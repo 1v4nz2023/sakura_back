@@ -24,8 +24,6 @@ public interface QuotationService {
     
     List<Quotation> findByPatientId(Integer patientId);
     
-    List<Quotation> findByDentistId(Integer dentistId);
-    
     List<Quotation> findByDateRange(LocalDateTime startDate, LocalDateTime endDate);
     
     List<Quotation> findByPatientSearchTerm(String searchTerm);

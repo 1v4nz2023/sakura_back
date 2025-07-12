@@ -8,14 +8,14 @@ import lombok.NoArgsConstructor;
 
 
 @Entity
-@Table(name = "tipo_documento")
+@Table(name = "document_type")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TipoDocumento {
+public class DocumentType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "tipo_documento_id")
+    @Column(name = "document_type_id")
     private Integer tipodocumentoId;
     private String code;
     private String name;

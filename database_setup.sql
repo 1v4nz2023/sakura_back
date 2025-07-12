@@ -135,21 +135,6 @@ INSERT INTO users (username, password_hash, email, role, is_active, created_at) 
 ('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa', 'admin@sakura.com', 'ADMIN', true, NOW())
 ON DUPLICATE KEY UPDATE username = VALUES(username), email = VALUES(email);
 
--- Insert sample dentists
-INSERT INTO dentists (first_name, last_name, specialty, active) VALUES 
-('Dr. María', 'González', 'Ortodoncista', true),
-('Dr. Carlos', 'Rodríguez', 'Endodoncista', true),
-('Dra. Ana', 'López', 'Periodoncista', true),
-('Dr. Luis', 'Martínez', 'Cirujano Oral', true)
-ON DUPLICATE KEY UPDATE first_name = VALUES(first_name);
-
--- Insert sample promos
-INSERT INTO promos (name, discount_pct, active_from, active_to) VALUES 
-('Descuento Estudiantes', 15.00, '2024-01-01', '2024-12-31'),
-('Primera Visita', 20.00, '2024-01-01', '2024-12-31'),
-('Pacientes Frecuentes', 10.00, '2024-01-01', '2024-12-31')
-ON DUPLICATE KEY UPDATE name = VALUES(name);
-
 -- Show confirmation
 SELECT 'Database sakura_database created successfully!' as message;
 SELECT 'Initial data inserted successfully!' as message; 

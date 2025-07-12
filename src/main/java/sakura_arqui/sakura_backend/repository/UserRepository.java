@@ -10,7 +10,7 @@ import sakura_arqui.sakura_backend.model.Employee;
 import sakura_arqui.sakura_backend.model.District;
 import sakura_arqui.sakura_backend.model.Gender;
 import sakura_arqui.sakura_backend.model.JobTitles;
-import sakura_arqui.sakura_backend.model.TipoDocumento;
+import sakura_arqui.sakura_backend.model.DocumentType;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,5 +39,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findByEmployee_District(District district);
     List<User> findByEmployee_Gender(Gender gender);
     List<User> findByEmployee_JobTitle(JobTitles jobTitle);
-    List<User> findByEmployee_TipoDocumento(TipoDocumento tipoDocumento);
+    List<User> findByEmployee_TipoDocumento(DocumentType tipoDocumento);
 } 

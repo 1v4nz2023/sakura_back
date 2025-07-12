@@ -29,10 +29,6 @@ public class Quotation {
     @JoinColumn(name = "history_id")
     private ClinicalHistory history;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "dentist_id")
-    private Dentist dentist;
-    
     @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalAmount;
     

@@ -17,8 +17,6 @@ public interface QuotationRepository extends JpaRepository<Quotation, Integer> {
     
     List<Quotation> findByPatientPatientId(Integer patientId);
     
-    List<Quotation> findByDentistDentistId(Integer dentistId);
-    
     List<Quotation> findByTotalAmountBetween(BigDecimal minAmount, BigDecimal maxAmount);
     
     List<Quotation> findByCreatedAtBetween(LocalDateTime startDate, LocalDateTime endDate);

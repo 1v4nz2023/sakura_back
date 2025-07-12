@@ -33,8 +33,8 @@ public class Patient {
     private LocalDateTime birthDate;
 
     @ManyToOne
-    @JoinColumn(name = "tipo_documento_id", nullable = false)
-    private TipoDocumento tipoDocumento;
+    @JoinColumn(name = "document_type_id", nullable = false)
+    private DocumentType tipoDocumento;
 
     @ManyToOne
     @JoinColumn(name = "gender_id", nullable = false)

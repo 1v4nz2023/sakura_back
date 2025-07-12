@@ -23,8 +23,6 @@ public class QuotationDto {
     
     private Integer historyId;
     
-    private Integer dentistId;
-    
     @NotNull(message = "Total amount is required")
     @DecimalMin(value = "0.0", inclusive = false, message = "Total amount must be greater than 0")
     private BigDecimal totalAmount;

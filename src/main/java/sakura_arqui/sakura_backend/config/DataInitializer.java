@@ -21,9 +21,7 @@ public class DataInitializer implements CommandLineRunner {
     
     private final UserRepository userRepository;
     private final PaymentMethodRepository paymentMethodRepository;
-    private final DentistRepository dentistRepository;
     private final ServiceRepository serviceRepository;
-    private final PromoRepository promoRepository;
     private final PasswordEncoder passwordEncoder;
     private final CategorieServiceRepository categorieServiceRepository;
     private final RolRepository rolRepository;
@@ -34,10 +32,8 @@ public class DataInitializer implements CommandLineRunner {
         
         initializePaymentMethods();
         initializeUsers();
-        initializeDentists();
         initializeCategories();
         initializeServices();
-        initializePromos();
         
         log.info("Data initialization completed successfully!");
     }
@@ -81,30 +77,7 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
     
-    private void initializeDentists() {
-        if (dentistRepository.count() == 0) {
-            log.info("Initializing dentists...");
-            
-            List<Dentist> dentists = Arrays.asList(
-                createDentist("Dr. María", "González", "Ortodoncista"),
-                createDentist("Dr. Carlos", "Rodríguez", "Endodoncista"),
-                createDentist("Dra. Ana", "López", "Periodoncista"),
-                createDentist("Dr. Luis", "Martínez", "Cirujano Oral")
-            );
-            
-            dentistRepository.saveAll(dentists);
-            log.info("Dentists initialized: {}", dentistRepository.count());
-        }
-    }
-    
-    private Dentist createDentist(String firstName, String lastName, String specialty) {
-        Dentist dentist = new Dentist();
-        dentist.setFirstName(firstName);
-        dentist.setLastName(lastName);
-        dentist.setSpecialty(specialty);
-        dentist.setActive(true);
-        return dentist;
-    }
+
     
     private void initializeCategories() {
         if (categorieServiceRepository.count() == 0) {
@@ -228,27 +201,4 @@ public class DataInitializer implements CommandLineRunner {
         return service;
     }
     
-    private void initializePromos() {
-        if (promoRepository.count() == 0) {
-            log.info("Initializing promos...");
-            
-            List<Promo> promos = Arrays.asList(
-                createPromo("Descuento Estudiantes", new BigDecimal("15.00"), LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31)),
-                createPromo("Primera Visita", new BigDecimal("20.00"), LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31)),
-                createPromo("Pacientes Frecuentes", new BigDecimal("10.00"), LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31))
-            );
-            
-            promoRepository.saveAll(promos);
-            log.info("Promos initialized: {}", promoRepository.count());
-        }
-    }
-    
-    private Promo createPromo(String name, BigDecimal discountPct, LocalDate activeFrom, LocalDate activeTo) {
-        Promo promo = new Promo();
-        promo.setName(name);
-        promo.setDiscountPct(discountPct);
-        promo.setActiveFrom(activeFrom);
-        promo.setActiveTo(activeTo);
-        return promo;
-    }
 } 

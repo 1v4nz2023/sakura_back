@@ -25,8 +25,8 @@ public class Employee {
     private boolean status;
 
     @ManyToOne
-    @JoinColumn(name = "tipo_documento_id", nullable = false)
-    private TipoDocumento tipoDocumento;
+    @JoinColumn(name = "document_type_id", nullable = false)
+    private DocumentType tipoDocumento;
 
     @ManyToOne
     @JoinColumn(name = "job_title_id", nullable = false)

@@ -29,10 +29,6 @@ public class Payment {
     @JoinColumn(name = "method_id", nullable = false)
     private PaymentMethod method;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "promo_id")
-    private Promo promo;
-    
     @Column(name = "amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
     
