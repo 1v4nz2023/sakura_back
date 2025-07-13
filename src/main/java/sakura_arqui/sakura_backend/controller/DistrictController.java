@@ -6,10 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sakura_arqui.sakura_backend.dto.DistrictDto;
-import sakura_arqui.sakura_backend.model.District;
+import sakura_arqui.sakura_backend.dto.DistrictResponseDto;
 import sakura_arqui.sakura_backend.service.DistrictService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/districts")
@@ -19,41 +20,49 @@ public class DistrictController {
     private final DistrictService districtService;
     
     @GetMapping
-    public ResponseEntity<List<District>> getAllDistricts() {
-        List<District> districts = districtService.findAll();
+    public ResponseEntity<List<DistrictResponseDto>> getAllDistricts() {
+        List<DistrictResponseDto> districts = districtService.findAll().stream()
+                .map(this::convertToResponseDto)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(districts);
     }
     
     @GetMapping("/active")
-    public ResponseEntity<List<District>> getActiveDistricts() {
-        List<District> districts = districtService.findActive();
+    public ResponseEntity<List<DistrictResponseDto>> getActiveDistricts() {
+        List<DistrictResponseDto> districts = districtService.findActive().stream()
+                .map(this::convertToResponseDto)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(districts);
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<District> getDistrictById(@PathVariable Integer id) {
+    public ResponseEntity<DistrictResponseDto> getDistrictById(@PathVariable Integer id) {
         return districtService.findById(id)
+                .map(this::convertToResponseDto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
     
     @GetMapping("/name/{name}")
-    public ResponseEntity<District> getDistrictByName(@PathVariable String name) {
+    public ResponseEntity<DistrictResponseDto> getDistrictByName(@PathVariable String name) {
         return districtService.findByName(name)
+                .map(this::convertToResponseDto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
     
     @PostMapping
-    public ResponseEntity<District> createDistrict(@Valid @RequestBody DistrictDto districtDto) {
-        District createdDistrict = districtService.createDistrict(districtDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdDistrict);
+    public ResponseEntity<DistrictResponseDto> createDistrict(@Valid @RequestBody DistrictDto districtDto) {
+        var createdDistrict = districtService.createDistrict(districtDto);
+        DistrictResponseDto responseDto = convertToResponseDto(createdDistrict);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<District> updateDistrict(@PathVariable Integer id, @Valid @RequestBody DistrictDto districtDto) {
-        District updatedDistrict = districtService.update(id, districtDto);
-        return ResponseEntity.ok(updatedDistrict);
+    public ResponseEntity<DistrictResponseDto> updateDistrict(@PathVariable Integer id, @Valid @RequestBody DistrictDto districtDto) {
+        var updatedDistrict = districtService.update(id, districtDto);
+        DistrictResponseDto responseDto = convertToResponseDto(updatedDistrict);
+        return ResponseEntity.ok(responseDto);
     }
     
     @DeleteMapping("/{id}")
@@ -63,8 +72,18 @@ public class DistrictController {
     }
     
     @GetMapping("/search")
-    public ResponseEntity<List<District>> searchDistricts(@RequestParam String searchTerm) {
-        List<District> districts = districtService.findBySearchTerm(searchTerm);
+    public ResponseEntity<List<DistrictResponseDto>> searchDistricts(@RequestParam String searchTerm) {
+        List<DistrictResponseDto> districts = districtService.findBySearchTerm(searchTerm).stream()
+                .map(this::convertToResponseDto)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(districts);
+    }
+    
+    private DistrictResponseDto convertToResponseDto(sakura_arqui.sakura_backend.model.District district) {
+        return new DistrictResponseDto(
+            district.getDistrictId(),
+            district.getName(),
+            district.isStatus()
+        );
     }
 } 

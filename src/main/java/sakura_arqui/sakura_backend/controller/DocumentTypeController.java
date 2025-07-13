@@ -6,10 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sakura_arqui.sakura_backend.dto.DocumentTypeDto;
-import sakura_arqui.sakura_backend.model.DocumentType;
 import sakura_arqui.sakura_backend.service.DocumentTypeService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/document-types")
@@ -19,41 +19,49 @@ public class DocumentTypeController {
     private final DocumentTypeService documentTypeService;
     
     @GetMapping
-    public ResponseEntity<List<DocumentType>> getAllDocumentTypes() {
-        List<DocumentType> documentTypes = documentTypeService.findAll();
+    public ResponseEntity<List<DocumentTypeDto>> getAllDocumentTypes() {
+        List<DocumentTypeDto> documentTypes = documentTypeService.findAll().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(documentTypes);
     }
     
     @GetMapping("/active")
-    public ResponseEntity<List<DocumentType>> getActiveDocumentTypes() {
-        List<DocumentType> documentTypes = documentTypeService.findActive();
+    public ResponseEntity<List<DocumentTypeDto>> getActiveDocumentTypes() {
+        List<DocumentTypeDto> documentTypes = documentTypeService.findActive().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(documentTypes);
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<DocumentType> getDocumentTypeById(@PathVariable Integer id) {
+    public ResponseEntity<DocumentTypeDto> getDocumentTypeById(@PathVariable Integer id) {
         return documentTypeService.findById(id)
+                .map(this::convertToDto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
     
     @GetMapping("/code/{code}")
-    public ResponseEntity<DocumentType> getDocumentTypeByCode(@PathVariable String code) {
+    public ResponseEntity<DocumentTypeDto> getDocumentTypeByCode(@PathVariable String code) {
         return documentTypeService.findByCode(code)
+                .map(this::convertToDto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
     
     @PostMapping
-    public ResponseEntity<DocumentType> createDocumentType(@Valid @RequestBody DocumentTypeDto documentTypeDto) {
-        DocumentType createdDocumentType = documentTypeService.createDocumentType(documentTypeDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdDocumentType);
+    public ResponseEntity<DocumentTypeDto> createDocumentType(@Valid @RequestBody DocumentTypeDto documentTypeDto) {
+        var createdDocumentType = documentTypeService.createDocumentType(documentTypeDto);
+        DocumentTypeDto responseDto = convertToDto(createdDocumentType);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<DocumentType> updateDocumentType(@PathVariable Integer id, @Valid @RequestBody DocumentTypeDto documentTypeDto) {
-        DocumentType updatedDocumentType = documentTypeService.update(id, documentTypeDto);
-        return ResponseEntity.ok(updatedDocumentType);
+    public ResponseEntity<DocumentTypeDto> updateDocumentType(@PathVariable Integer id, @Valid @RequestBody DocumentTypeDto documentTypeDto) {
+        var updatedDocumentType = documentTypeService.update(id, documentTypeDto);
+        DocumentTypeDto responseDto = convertToDto(updatedDocumentType);
+        return ResponseEntity.ok(responseDto);
     }
     
     @DeleteMapping("/{id}")
@@ -63,8 +71,19 @@ public class DocumentTypeController {
     }
     
     @GetMapping("/search")
-    public ResponseEntity<List<DocumentType>> searchDocumentTypes(@RequestParam String searchTerm) {
-        List<DocumentType> documentTypes = documentTypeService.findBySearchTerm(searchTerm);
+    public ResponseEntity<List<DocumentTypeDto>> searchDocumentTypes(@RequestParam String searchTerm) {
+        List<DocumentTypeDto> documentTypes = documentTypeService.findBySearchTerm(searchTerm).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(documentTypes);
+    }
+    
+    private DocumentTypeDto convertToDto(sakura_arqui.sakura_backend.model.DocumentType documentType) {
+        return new DocumentTypeDto(
+            documentType.getDocumentTypeId(),
+            documentType.getCode(),
+            documentType.getName(),
+            documentType.isStatus()
+        );
     }
 } 

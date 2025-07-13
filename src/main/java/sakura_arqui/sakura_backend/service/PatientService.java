@@ -1,6 +1,7 @@
 package sakura_arqui.sakura_backend.service;
 
 import sakura_arqui.sakura_backend.dto.PatientDto;
+import sakura_arqui.sakura_backend.dto.PatientResponseDto;
 import sakura_arqui.sakura_backend.model.Patient;
 
 import java.time.LocalDateTime;
@@ -32,4 +33,19 @@ public interface PatientService {
     Patient createPatient(PatientDto patientDto);
     
     List<Patient> findRecentPatients(int limit);
+    
+    // Nuevos métodos DTO
+    List<PatientResponseDto> findAllAsDto();
+    
+    Optional<PatientResponseDto> findByIdAsDto(Integer id);
+    
+    Optional<PatientResponseDto> findByDniAsDto(String dni);
+    
+    List<PatientResponseDto> findBySearchTermAsDto(String searchTerm);
+    
+    List<PatientResponseDto> findRecentPatientsAsDto(int limit);
+    
+    PatientResponseDto createPatientAndReturnDto(PatientDto patientDto);
+    
+    PatientResponseDto updateAndReturnDto(Integer id, PatientDto patientDto);
 } 
