@@ -1,5 +1,6 @@
 package sakura_arqui.sakura_backend.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -34,14 +35,17 @@ public class Patient {
 
     @ManyToOne
     @JoinColumn(name = "document_type_id", nullable = false)
-    private DocumentType tipoDocumento;
+    @JsonBackReference
+    private DocumentType documentType;
 
     @ManyToOne
     @JoinColumn(name = "gender_id", nullable = false)
+    @JsonBackReference
     private Gender gender;
 
     @ManyToOne
     @JoinColumn(name = "district_id", nullable = false)
+    @JsonBackReference
     private District district;
     
     @Column(name = "phone", length = 20)

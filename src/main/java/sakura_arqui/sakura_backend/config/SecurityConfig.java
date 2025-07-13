@@ -30,8 +30,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/auth/**", "/api/health/**").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll() // Allow all requests without authentication
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         

@@ -76,6 +76,16 @@ public class UserController {
         return ResponseEntity.ok(exists);
     }
     
+    @GetMapping("/public/info")
+    public ResponseEntity<?> getPublicInfo() {
+        // Public endpoint for welcome page
+        return ResponseEntity.ok(Map.of(
+            "appName", "Sakura Dental Clinic",
+            "version", "1.0.0",
+            "status", "running"
+        ));
+    }
+    
     @PutMapping("/{id}/password")
     public ResponseEntity<Boolean> changePassword(@PathVariable Integer id, 
                                                  @RequestParam String oldPassword, 
@@ -86,9 +96,27 @@ public class UserController {
 
     @GetMapping("/username")
     public ResponseEntity<?> getCurrentUsername(Authentication authentication) {
-        if (authentication != null && authentication.getPrincipal() instanceof sakura_arqui.sakura_backend.model.User user) {
-            return ResponseEntity.ok(Map.of("username", user.getUsername()));
+        if (authentication != null) {
+            if (authentication.getPrincipal() instanceof sakura_arqui.sakura_backend.model.User user) {
+                return ResponseEntity.ok(Map.of("username", user.getUsername()));
+            } else if (authentication.getPrincipal() instanceof String username) {
+                return ResponseEntity.ok(Map.of("username", username));
+            }
         }
-        return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
+        // Since security is disabled for testing, return a default response
+        return ResponseEntity.ok(Map.of(
+            "username", null,
+            "authenticated", false,
+            "message", "No user currently authenticated"
+        ));
+    }
+    
+    @GetMapping("/check-auth")
+    public ResponseEntity<?> checkAuthenticationStatus() {
+        // This endpoint is specifically for the welcome page to check auth status
+        return ResponseEntity.ok(Map.of(
+            "authenticated", false,
+            "message", "Authentication check endpoint - security is currently disabled for testing"
+        ));
     }
 } 

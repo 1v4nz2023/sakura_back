@@ -1,5 +1,6 @@
 package sakura_arqui.sakura_backend.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,8 +22,10 @@ public class District {
     private boolean status;
 
     @OneToMany(mappedBy = "district")
+    @JsonManagedReference
     private java.util.Set<Employee> employees = new java.util.HashSet<>();
 
     @OneToMany(mappedBy = "district")
+    @JsonManagedReference
     private java.util.Set<Patient> patients = new java.util.HashSet<>();
 }

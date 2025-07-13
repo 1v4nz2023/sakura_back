@@ -34,8 +34,8 @@ public class User {
     @JoinColumn(name = "role_id", nullable = false)
     private Rol rol;
     
-    @OneToOne
-    @JoinColumn(name = "employee_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employee_id", nullable = true)
     private Employee employee;
     
     @Column(name = "is_active")

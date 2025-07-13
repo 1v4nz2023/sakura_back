@@ -5,7 +5,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sakura_arqui.sakura_backend.dto.PatientDto;
 import sakura_arqui.sakura_backend.exception.ResourceNotFoundException;
+import sakura_arqui.sakura_backend.model.DocumentType;
+import sakura_arqui.sakura_backend.model.District;
+import sakura_arqui.sakura_backend.model.Gender;
 import sakura_arqui.sakura_backend.model.Patient;
+import sakura_arqui.sakura_backend.repository.DocumentTypeRepository;
+import sakura_arqui.sakura_backend.repository.DistrictRepository;
+import sakura_arqui.sakura_backend.repository.GenderRepository;
 import sakura_arqui.sakura_backend.repository.PatientRepository;
 import sakura_arqui.sakura_backend.service.PatientService;
 
@@ -19,6 +25,9 @@ import java.util.Optional;
 public class PatientServiceImpl implements PatientService {
     
     private final PatientRepository patientRepository;
+    private final DocumentTypeRepository documentTypeRepository;
+    private final GenderRepository genderRepository;
+    private final DistrictRepository districtRepository;
     
     @Override
     @Transactional(readOnly = true)
@@ -48,12 +57,7 @@ public class PatientServiceImpl implements PatientService {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + id));
         
-        patient.setFirstName(patientDto.getFirstName());
-        patient.setLastName(patientDto.getLastName());
-        patient.setDni(patientDto.getDni());
-        patient.setPhoneNumber(patientDto.getPhone());
-        patient.setEmail(patientDto.getEmail());
-        
+        updatePatientFromDto(patient, patientDto);
         return patientRepository.save(patient);
     }
     
@@ -100,12 +104,7 @@ public class PatientServiceImpl implements PatientService {
         }
         
         Patient patient = new Patient();
-        patient.setFirstName(patientDto.getFirstName());
-        patient.setLastName(patientDto.getLastName());
-        patient.setDni(patientDto.getDni());
-        patient.setPhoneNumber(patientDto.getPhone());
-        patient.setEmail(patientDto.getEmail());
-        
+        updatePatientFromDto(patient, patientDto);
         return patientRepository.save(patient);
     }
     
@@ -116,5 +115,36 @@ public class PatientServiceImpl implements PatientService {
                 .sorted((p1, p2) -> p2.getCreatedAt().compareTo(p1.getCreatedAt()))
                 .limit(limit)
                 .toList();
+    }
+    
+    private void updatePatientFromDto(Patient patient, PatientDto patientDto) {
+        patient.setFirstName(patientDto.getFirstName());
+        patient.setLastName(patientDto.getLastName());
+        patient.setDni(patientDto.getDni());
+        patient.setBirthDate(patientDto.getBirthDate());
+        patient.setPhoneNumber(patientDto.getPhone());
+        patient.setEmail(patientDto.getEmail());
+        patient.setStatus(patientDto.getStatus() != null ? patientDto.getStatus() : true);
+        
+        // Set document type
+        if (patientDto.getDocumentTypeId() != null) {
+            DocumentType documentType = documentTypeRepository.findById(patientDto.getDocumentTypeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Document type not found with id: " + patientDto.getDocumentTypeId()));
+            patient.setDocumentType(documentType);
+        }
+        
+        // Set gender
+        if (patientDto.getGenderId() != null) {
+            Gender gender = genderRepository.findById(patientDto.getGenderId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Gender not found with id: " + patientDto.getGenderId()));
+            patient.setGender(gender);
+        }
+        
+        // Set district
+        if (patientDto.getDistrictId() != null) {
+            District district = districtRepository.findById(patientDto.getDistrictId())
+                    .orElseThrow(() -> new ResourceNotFoundException("District not found with id: " + patientDto.getDistrictId()));
+            patient.setDistrict(district);
+        }
     }
 } 

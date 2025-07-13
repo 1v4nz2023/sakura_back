@@ -39,5 +39,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findByEmployee_District(District district);
     List<User> findByEmployee_Gender(Gender gender);
     List<User> findByEmployee_JobTitle(JobTitles jobTitle);
-    List<User> findByEmployee_TipoDocumento(DocumentType tipoDocumento);
+    List<User> findByEmployee_DocumentType(DocumentType documentType);
 } 

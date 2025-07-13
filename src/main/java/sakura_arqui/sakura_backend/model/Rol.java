@@ -19,11 +19,16 @@ public class Rol {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     @Column(name = "role_id")
     private Integer roleId;
+    
+    @Column(name = "name", unique = true)
     private String name;
+    
+    @Column(name = "descripcion")
     private String descripcion;
+    
+    @Column(name = "status")
     private boolean status;
 
     @ManyToMany(fetch = FetchType.LAZY)
