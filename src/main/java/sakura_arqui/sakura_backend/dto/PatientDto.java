@@ -43,7 +43,7 @@ public class PatientDto {
     private DistrictDto district;
 
     @Pattern(regexp = "^[+]?[0-9\\s-()]{7,20}$", message = "Invalid phone number format")
-    private String phoneNumber;
+    private String phone;
 
     @Email(message = "Invalid email format")
     @Size(max = 120, message = "Email must be less than 120 characters")

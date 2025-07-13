@@ -19,7 +19,7 @@ public interface PatientRepository extends JpaRepository<Patient, Integer> {
     
     List<Patient> findByEmailContainingIgnoreCase(String email);
     
-    List<Patient> findByPhoneNumberContaining(String phoneNumber);
+    List<Patient> findByPhoneContaining(String phone);
     
     @Query("SELECT p FROM Patient p WHERE p.firstName LIKE %:searchTerm% OR p.lastName LIKE %:searchTerm% OR p.dni LIKE %:searchTerm%")
     List<Patient> findBySearchTerm(@Param("searchTerm") String searchTerm);

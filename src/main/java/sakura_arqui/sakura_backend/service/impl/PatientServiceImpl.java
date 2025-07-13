@@ -167,7 +167,7 @@ public class PatientServiceImpl implements PatientService {
         patient.setLastName(patientDto.getLastName());
         patient.setDni(patientDto.getDni());
         patient.setBirthDate(patientDto.getBirthDate());
-        patient.setPhoneNumber(patientDto.getPhoneNumber());
+        patient.setPhone(patientDto.getPhone());
         patient.setEmail(patientDto.getEmail());
         patient.setStatus(patientDto.getStatus() != null ? patientDto.getStatus() : true);
         
@@ -200,7 +200,7 @@ public class PatientServiceImpl implements PatientService {
         dto.setLastName(patient.getLastName());
         dto.setDni(patient.getDni());
         dto.setBirthDate(patient.getBirthDate());
-        dto.setPhoneNumber(patient.getPhoneNumber());
+        dto.setPhone(patient.getPhone());
         dto.setEmail(patient.getEmail());
         dto.setStatus(patient.isStatus());
         dto.setCreatedAt(patient.getCreatedAt());

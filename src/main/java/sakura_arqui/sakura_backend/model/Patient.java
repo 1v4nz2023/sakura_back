@@ -49,7 +49,7 @@ public class Patient {
     private District district;
     
     @Column(name = "phone", length = 20)
-    private String phoneNumber;
+    private String phone;
     
     @Column(name = "email", length = 120)
     private String email;
