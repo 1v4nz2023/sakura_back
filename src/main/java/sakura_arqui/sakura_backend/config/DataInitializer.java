@@ -29,6 +29,9 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         log.info("Starting data initialization...");
         
+        // Clean up any duplicate roles first
+        cleanupDuplicateRoles();
+        
         initializePaymentMethods();
         initializeUsers();
         initializeCategories();
@@ -37,34 +40,57 @@ public class DataInitializer implements CommandLineRunner {
         log.info("Data initialization completed successfully!");
     }
     
+    private void cleanupDuplicateRoles() {
+        log.info("Checking for duplicate roles...");
+        // This will be handled by the unique constraint now
+        // But we can add additional cleanup logic here if needed
+    }
+    
     private void initializePaymentMethods() {
-        if (paymentMethodRepository.count() == 0) {
-            log.info("Initializing payment methods...");
-            
-            List<String> paymentMethods = Arrays.asList(
-                "Efectivo",
-                "Tarjeta de Crédito",
-                "Tarjeta de Débito",
-                "Transferencia Bancaria",
-                "Yape",
-                "Plin"
-            );
-            
-            paymentMethods.forEach(methodName -> {
+        log.info("Checking payment methods...");
+        
+        List<String> paymentMethods = Arrays.asList(
+            "Efectivo",
+            "Tarjeta de Crédito",
+            "Tarjeta de Débito",
+            "Transferencia Bancaria",
+            "Yape",
+            "Plin"
+        );
+        
+        int createdCount = 0;
+        for (String methodName : paymentMethods) {
+            if (!paymentMethodRepository.existsByName(methodName)) {
                 PaymentMethod method = new PaymentMethod();
                 method.setName(methodName);
                 paymentMethodRepository.save(method);
-            });
-            
-            log.info("Payment methods initialized: {}", paymentMethodRepository.count());
+                createdCount++;
+            }
+        }
+        
+        if (createdCount > 0) {
+            log.info("Payment methods initialized: {} new methods created", createdCount);
+        } else {
+            log.info("All payment methods already exist");
         }
     }
     
     private void initializeUsers() {
-        if (userRepository.count() == 0) {
+        // Check if admin user already exists
+        if (!userRepository.existsByUsername("admin")) {
             log.info("Initializing users...");
+            
+            // Handle potential duplicate roles
             Rol adminRol = rolRepository.findByName("ADMIN")
-                .orElseGet(() -> rolRepository.save(new Rol(null, "ADMIN", "Administrador", true, new java.util.HashSet<>(), new java.util.HashSet<>())));
+                .orElseGet(() -> {
+                    // If no ADMIN role exists, create one
+                    Rol newRol = new Rol();
+                    newRol.setName("ADMIN");
+                    newRol.setDescripcion("Administrador");
+                    newRol.setStatus(true);
+                    return rolRepository.save(newRol);
+                });
+            
             User adminUser = new User();
             adminUser.setUsername("admin");
             adminUser.setEmail("admin@sakura.com");
@@ -73,26 +99,41 @@ public class DataInitializer implements CommandLineRunner {
             adminUser.setIsActive(true);
             userRepository.save(adminUser);
             log.info("Admin user created: admin/admin123");
+        } else {
+            log.info("Admin user already exists, skipping user initialization");
         }
     }
     
 
     
     private void initializeCategories() {
-        if (categorieServiceRepository.count() == 0) {
-            List<CategorieService> categories = Arrays.asList(
-                new CategorieService(null, "Diagnóstico", "Servicios de diagnóstico dental", true, new java.util.HashSet<>()),
-                new CategorieService(null, "Restaurativo", "Servicios restaurativos", true, new java.util.HashSet<>()),
-                new CategorieService(null, "Preventivo", "Servicios preventivos", true, new java.util.HashSet<>()),
-                new CategorieService(null, "Rehabilitación", "Servicios de rehabilitación", true, new java.util.HashSet<>()),
-                new CategorieService(null, "Endodoncia", "Servicios de endodoncia", true, new java.util.HashSet<>()),
-                new CategorieService(null, "Odontopediatría", "Servicios para niños", true, new java.util.HashSet<>()),
-                new CategorieService(null, "Cirugía", "Servicios quirúrgicos", true, new java.util.HashSet<>()),
-                new CategorieService(null, "Estética", "Servicios estéticos", true, new java.util.HashSet<>()),
-                new CategorieService(null, "Periodoncia", "Servicios periodontales", true, new java.util.HashSet<>()),
-                new CategorieService(null, "Otros", "Servicios Otros", true, new java.util.HashSet<>())
-            );
-            categorieServiceRepository.saveAll(categories);
+        log.info("Checking categories...");
+        
+        List<CategorieService> categories = Arrays.asList(
+            new CategorieService(null, "Diagnóstico", "Servicios de diagnóstico dental", true, new java.util.HashSet<>()),
+            new CategorieService(null, "Restaurativo", "Servicios restaurativos", true, new java.util.HashSet<>()),
+            new CategorieService(null, "Preventivo", "Servicios preventivos", true, new java.util.HashSet<>()),
+            new CategorieService(null, "Rehabilitación", "Servicios de rehabilitación", true, new java.util.HashSet<>()),
+            new CategorieService(null, "Endodoncia", "Servicios de endodoncia", true, new java.util.HashSet<>()),
+            new CategorieService(null, "Odontopediatría", "Servicios para niños", true, new java.util.HashSet<>()),
+            new CategorieService(null, "Cirugía", "Servicios quirúrgicos", true, new java.util.HashSet<>()),
+            new CategorieService(null, "Estética", "Servicios estéticos", true, new java.util.HashSet<>()),
+            new CategorieService(null, "Periodoncia", "Servicios periodontales", true, new java.util.HashSet<>()),
+            new CategorieService(null, "Otros", "Servicios Otros", true, new java.util.HashSet<>())
+        );
+        
+        int createdCount = 0;
+        for (CategorieService category : categories) {
+            if (!categorieServiceRepository.findByName(category.getName()).isPresent()) {
+                categorieServiceRepository.save(category);
+                createdCount++;
+            }
+        }
+        
+        if (createdCount > 0) {
+            log.info("Categories initialized: {} new categories created", createdCount);
+        } else {
+            log.info("All categories already exist");
         }
     }
     

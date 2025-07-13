@@ -9,7 +9,125 @@ COLLATE utf8mb4_unicode_ci;
 -- Use the database
 USE sakura_database;
 
--- 1. Create categorie_service table
+-- 1. Create roles table
+CREATE TABLE IF NOT EXISTS roles (
+    role_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    descripcion VARCHAR(255),
+    status BOOLEAN DEFAULT TRUE
+);
+
+-- 2. Create permissions table
+CREATE TABLE IF NOT EXISTS permissions (
+    permission_id INT AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(50) NOT NULL UNIQUE,
+    descripcion VARCHAR(255),
+    status BOOLEAN DEFAULT TRUE
+);
+
+-- 3. Create role_permissions junction table
+CREATE TABLE IF NOT EXISTS role_permissions (
+    role_id INT NOT NULL,
+    permission_id INT NOT NULL,
+    PRIMARY KEY (role_id, permission_id),
+    FOREIGN KEY (role_id) REFERENCES roles(role_id),
+    FOREIGN KEY (permission_id) REFERENCES permissions(permission_id)
+);
+
+-- 4. Create document_type table
+CREATE TABLE IF NOT EXISTS document_type (
+    document_type_id INT AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(10) NOT NULL UNIQUE,
+    name VARCHAR(100) NOT NULL,
+    status BOOLEAN DEFAULT TRUE
+);
+
+-- 5. Create gender table
+CREATE TABLE IF NOT EXISTS gender (
+    gender_id INT AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(10) NOT NULL UNIQUE,
+    name VARCHAR(50) NOT NULL,
+    status BOOLEAN DEFAULT TRUE
+);
+
+-- 6. Create district table
+CREATE TABLE IF NOT EXISTS district (
+    district_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    status BOOLEAN DEFAULT TRUE
+);
+
+-- 7. Create job_titles table
+CREATE TABLE IF NOT EXISTS job_titles (
+    job_title_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description VARCHAR(255),
+    status BOOLEAN DEFAULT TRUE
+);
+
+-- 8. Create employee table
+CREATE TABLE IF NOT EXISTS employee (
+    employee_id INT AUTO_INCREMENT PRIMARY KEY,
+    doc_number INT,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    specialty VARCHAR(100),
+    hired_at DATETIME,
+    phone VARCHAR(20),
+    email VARCHAR(120),
+    status BOOLEAN DEFAULT TRUE,
+    document_type_id INT NOT NULL,
+    job_title_id INT NOT NULL,
+    gender_id INT NOT NULL,
+    district_id INT NOT NULL,
+    FOREIGN KEY (document_type_id) REFERENCES document_type(document_type_id),
+    FOREIGN KEY (job_title_id) REFERENCES job_titles(job_title_id),
+    FOREIGN KEY (gender_id) REFERENCES gender(gender_id),
+    FOREIGN KEY (district_id) REFERENCES district(district_id)
+);
+
+-- 9. Create users table
+CREATE TABLE IF NOT EXISTS users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(60) NOT NULL UNIQUE,
+    password_hash VARCHAR(95) NOT NULL,
+    email VARCHAR(120) NOT NULL UNIQUE,
+    role_id INT NOT NULL,
+    employee_id INT,
+    is_active BOOLEAN DEFAULT TRUE,
+    last_login DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (role_id) REFERENCES roles(role_id),
+    FOREIGN KEY (employee_id) REFERENCES employee(employee_id)
+);
+
+-- 10. Create patients table
+CREATE TABLE IF NOT EXISTS patients (
+    patient_id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(80) NOT NULL,
+    last_name VARCHAR(80) NOT NULL,
+    doc_number VARCHAR(8) UNIQUE,
+    birth_date DATETIME,
+    document_type_id INT NOT NULL,
+    gender_id INT NOT NULL,
+    district_id INT NOT NULL,
+    phone VARCHAR(20),
+    email VARCHAR(120),
+    status BOOLEAN DEFAULT TRUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (document_type_id) REFERENCES document_type(document_type_id),
+    FOREIGN KEY (gender_id) REFERENCES gender(gender_id),
+    FOREIGN KEY (district_id) REFERENCES district(district_id)
+);
+
+-- 11. Create payment_methods table
+CREATE TABLE IF NOT EXISTS payment_methods (
+    method_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(40) NOT NULL UNIQUE
+);
+
+-- 12. Create categorie_service table
 CREATE TABLE IF NOT EXISTS categorie_service (
     categorie_service_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
@@ -17,7 +135,7 @@ CREATE TABLE IF NOT EXISTS categorie_service (
     status BOOLEAN DEFAULT TRUE
 );
 
--- 2. Create services table with foreign key to categorie_service
+-- 13. Create services table
 CREATE TABLE IF NOT EXISTS services (
     service_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -28,7 +146,139 @@ CREATE TABLE IF NOT EXISTS services (
     FOREIGN KEY (categorie_service_id) REFERENCES categorie_service(categorie_service_id)
 );
 
--- 3. Insert unique categories from Excel
+-- 14. Create clinical_histories table
+CREATE TABLE IF NOT EXISTS clinical_histories (
+    history_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    notes TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES patients(patient_id)
+);
+
+-- 15. Create quotations table
+CREATE TABLE IF NOT EXISTS quotations (
+    quotation_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    history_id INT,
+    total_amount DECIMAL(10,2) NOT NULL,
+    status ENUM('PENDIENTE', 'ACEPTADA', 'PAGADA', 'ANULADA') DEFAULT 'PENDIENTE',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES patients(patient_id),
+    FOREIGN KEY (history_id) REFERENCES clinical_histories(history_id)
+);
+
+-- 16. Create quotation_items table
+CREATE TABLE IF NOT EXISTS quotation_items (
+    item_id INT AUTO_INCREMENT PRIMARY KEY,
+    quotation_id INT NOT NULL,
+    service_id INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    unit_price DECIMAL(10,2) NOT NULL,
+    subtotal DECIMAL(10,2),
+    FOREIGN KEY (quotation_id) REFERENCES quotations(quotation_id),
+    FOREIGN KEY (service_id) REFERENCES services(service_id)
+);
+
+-- 17. Create payments table
+CREATE TABLE IF NOT EXISTS payments (
+    payment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    quotation_id INT NOT NULL,
+    method_id INT NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    balance_remaining DECIMAL(10,2) NOT NULL,
+    status ENUM('PENDIENTE', 'CONFIRMADO', 'ANULADO') DEFAULT 'PENDIENTE',
+    payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by INT NOT NULL,
+    canceled_by INT,
+    FOREIGN KEY (quotation_id) REFERENCES quotations(quotation_id),
+    FOREIGN KEY (method_id) REFERENCES payment_methods(method_id),
+    FOREIGN KEY (created_by) REFERENCES users(user_id),
+    FOREIGN KEY (canceled_by) REFERENCES users(user_id)
+);
+
+-- 18. Create receipts table
+CREATE TABLE IF NOT EXISTS receipts (
+    receipt_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    payment_id BIGINT NOT NULL,
+    receipt_number VARCHAR(30) NOT NULL UNIQUE,
+    receipt_type ENUM('BOLETA', 'FACTURA') NOT NULL,
+    generated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (payment_id) REFERENCES payments(payment_id)
+);
+
+-- Insert initial data for roles
+INSERT INTO roles (name, descripcion, status) VALUES
+('ADMIN', 'Administrador del sistema', TRUE),
+('DENTIST', 'Dentista', TRUE),
+('ASSISTANT', 'Asistente dental', TRUE),
+('RECEPTIONIST', 'Recepcionista', TRUE)
+ON DUPLICATE KEY UPDATE name = VALUES(name);
+
+-- Insert initial data for permissions
+INSERT INTO permissions (code, descripcion, status) VALUES
+('USER_CREATE', 'Crear usuarios', TRUE),
+('USER_READ', 'Ver usuarios', TRUE),
+('USER_UPDATE', 'Actualizar usuarios', TRUE),
+('USER_DELETE', 'Eliminar usuarios', TRUE),
+('PATIENT_CREATE', 'Crear pacientes', TRUE),
+('PATIENT_READ', 'Ver pacientes', TRUE),
+('PATIENT_UPDATE', 'Actualizar pacientes', TRUE),
+('PATIENT_DELETE', 'Eliminar pacientes', TRUE),
+('QUOTATION_CREATE', 'Crear cotizaciones', TRUE),
+('QUOTATION_READ', 'Ver cotizaciones', TRUE),
+('QUOTATION_UPDATE', 'Actualizar cotizaciones', TRUE),
+('QUOTATION_DELETE', 'Eliminar cotizaciones', TRUE)
+ON DUPLICATE KEY UPDATE code = VALUES(code);
+
+-- Insert initial data for document types
+INSERT INTO document_type (code, name, status) VALUES
+('DNI', 'Documento Nacional de Identidad', TRUE),
+('CE', 'Carné de Extranjería', TRUE),
+('PASSPORT', 'Pasaporte', TRUE),
+('RUC', 'Registro Único de Contribuyentes', TRUE)
+ON DUPLICATE KEY UPDATE code = VALUES(code);
+
+-- Insert initial data for genders
+INSERT INTO gender (code, name, status) VALUES
+('M', 'Masculino', TRUE),
+('F', 'Femenino', TRUE),
+('O', 'Otro', TRUE)
+ON DUPLICATE KEY UPDATE code = VALUES(code);
+
+-- Insert initial data for districts
+INSERT INTO district (name, status) VALUES
+('Lima', TRUE),
+('Miraflores', TRUE),
+('San Isidro', TRUE),
+('Barranco', TRUE),
+('Surco', TRUE)
+ON DUPLICATE KEY UPDATE name = VALUES(name);
+
+-- Insert initial data for job titles
+INSERT INTO job_titles (name, description, status) VALUES
+('Dentista General', 'Dentista con práctica general', TRUE),
+('Ortodoncista', 'Especialista en ortodoncia', TRUE),
+('Endodoncista', 'Especialista en endodoncia', TRUE),
+('Asistente Dental', 'Asistente de consultorio dental', TRUE),
+('Recepcionista', 'Atención al público y citas', TRUE)
+ON DUPLICATE KEY UPDATE name = VALUES(name);
+
+-- Insert initial data for payment methods
+INSERT INTO payment_methods (name) VALUES 
+('Efectivo'),
+('Tarjeta de Crédito'),
+('Tarjeta de Débito'),
+('Transferencia Bancaria'),
+('Yape'),
+('Plin')
+ON DUPLICATE KEY UPDATE name = VALUES(name);
+
+-- Insert initial admin user (password: admin123)
+INSERT INTO users (username, password_hash, email, role_id, is_active, created_at) VALUES 
+('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa', 'admin@sakura.com', (SELECT role_id FROM roles WHERE name='ADMIN'), true, NOW())
+ON DUPLICATE KEY UPDATE username = VALUES(username), email = VALUES(email);
+
+-- Insert initial categories
 INSERT INTO categorie_service (name, description, status) VALUES
 ('Diagnóstico', 'Servicios de diagnóstico dental', TRUE),
 ('Restaurativo', 'Servicios restaurativos', TRUE),
@@ -42,7 +292,7 @@ INSERT INTO categorie_service (name, description, status) VALUES
 ('Otros', 'Servicios Otros', TRUE)
 ON DUPLICATE KEY UPDATE name = VALUES(name);
 
--- 4. Insert services (examples, fill in the rest as needed)
+-- Insert initial services (examples)
 INSERT INTO services (name, description, base_price, status, categorie_service_id) VALUES
 ('Mock Up', 'Prueba estética temporal para visualizar cambios.', 25, TRUE, (SELECT categorie_service_id FROM categorie_service WHERE name='Diagnóstico')),
 ('Diseño Digital', 'Planificación digital de la sonrisa.', 500, TRUE, (SELECT categorie_service_id FROM categorie_service WHERE name='Diagnóstico')),
@@ -120,21 +370,7 @@ INSERT INTO services (name, description, base_price, status, categorie_service_i
 ('Recuperación de espacio biológico', 'Cirugía para restablecer el espacio encía-hueso.', 350, TRUE, (SELECT categorie_service_id FROM categorie_service WHERE name='Periodoncia'))
 ON DUPLICATE KEY UPDATE name = VALUES(name);
 
--- Insert initial data for payment methods
-INSERT INTO payment_methods (name) VALUES 
-('Efectivo'),
-('Tarjeta de Crédito'),
-('Tarjeta de Débito'),
-('Transferencia Bancaria'),
-('Yape'),
-('Plin')
-ON DUPLICATE KEY UPDATE name = VALUES(name);
-
--- Insert initial admin user (password: admin123)
-INSERT INTO users (username, password_hash, email, role, is_active, created_at) VALUES 
-('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa', 'admin@sakura.com', 'ADMIN', true, NOW())
-ON DUPLICATE KEY UPDATE username = VALUES(username), email = VALUES(email);
-
 -- Show confirmation
 SELECT 'Database sakura_database created successfully!' as message;
+SELECT 'All tables created successfully!' as message;
 SELECT 'Initial data inserted successfully!' as message; 
