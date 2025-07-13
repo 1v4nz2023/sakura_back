@@ -1,5 +1,6 @@
 package sakura_arqui.sakura_backend.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,7 +13,7 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Service {
+public class ServiceModel {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,5 +35,6 @@ public class Service {
     // -----------------------------------
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "categorie_service_id", nullable = false)
+    @JsonBackReference
     private CategorieService category;
 } 

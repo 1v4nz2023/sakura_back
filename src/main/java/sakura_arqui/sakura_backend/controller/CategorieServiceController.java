@@ -1,103 +1,103 @@
 package sakura_arqui.sakura_backend.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import sakura_arqui.sakura_backend.model.CategorieService;
-import sakura_arqui.sakura_backend.repository.CategorieServiceRepository;
+import sakura_arqui.sakura_backend.dto.CategorieServiceDto;
+import sakura_arqui.sakura_backend.dto.ServiceDto;
+import sakura_arqui.sakura_backend.service.CategorieServiceService;
+import sakura_arqui.sakura_backend.service.ServiceService;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/categories")
 @RequiredArgsConstructor
+@Slf4j
 public class CategorieServiceController {
     
-    private final CategorieServiceRepository categorieServiceRepository;
+    private final CategorieServiceService categorieServiceService;
+    private final ServiceService serviceService;
     
     @GetMapping
-    public ResponseEntity<List<CategorieService>> getAllCategories() {
-        List<CategorieService> categories = categorieServiceRepository.findAll();
-        return ResponseEntity.ok(categories);
+    public ResponseEntity<List<CategorieServiceDto>> getAllCategories() {
+        try {
+            log.info("Fetching all categories...");
+            List<CategorieServiceDto> categories = categorieServiceService.getAllCategories();
+            log.info("Found {} categories", categories.size());
+            return ResponseEntity.ok(categories);
+        } catch (Exception e) {
+            log.error("Error fetching categories: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<CategorieService> getCategoryById(@PathVariable Integer id) {
-        return categorieServiceRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<CategorieServiceDto> getCategoryById(@PathVariable Integer id) {
+        try {
+            log.info("Fetching category with id: {}", id);
+            CategorieServiceDto category = categorieServiceService.getCategoryById(id);
+            if (category != null) {
+                return ResponseEntity.ok(category);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            log.error("Error fetching category with id {}: ", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
     
-    @GetMapping("/name/{name}")
-    public ResponseEntity<CategorieService> getCategoryByName(@PathVariable String name) {
-        return categorieServiceRepository.findByName(name)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/{id}/services")
+    public ResponseEntity<List<ServiceDto>> getServicesByCategory(@PathVariable Integer id) {
+        try {
+            log.info("Fetching services for category id: {}", id);
+            List<ServiceDto> services = serviceService.getServicesByCategory(id);
+            log.info("Found {} services for category {}", services.size(), id);
+            return ResponseEntity.ok(services);
+        } catch (Exception e) {
+            log.error("Error fetching services for category {}: ", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
     
     @PostMapping
-    public ResponseEntity<CategorieService> createCategory(@RequestBody CategorieService category) {
-        CategorieService createdCategory = categorieServiceRepository.save(category);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
+    public ResponseEntity<CategorieServiceDto> createCategory(@RequestBody CategorieServiceDto categoryDto) {
+        try {
+            log.info("Creating new category: {}", categoryDto.getName());
+            CategorieServiceDto createdCategory = categorieServiceService.createCategory(categoryDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
+        } catch (Exception e) {
+            log.error("Error creating category: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<CategorieService> updateCategory(@PathVariable Integer id, @RequestBody CategorieService category) {
-        if (!categorieServiceRepository.existsById(id)) {
+    public ResponseEntity<CategorieServiceDto> updateCategory(@PathVariable Integer id, @RequestBody CategorieServiceDto categoryDto) {
+        try {
+            log.info("Updating category with id: {}", id);
+            CategorieServiceDto updatedCategory = categorieServiceService.updateCategory(id, categoryDto);
+            if (updatedCategory != null) {
+                return ResponseEntity.ok(updatedCategory);
+            }
             return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            log.error("Error updating category with id {}: ", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        category.setCategorieServiceId(id);
-        CategorieService updatedCategory = categorieServiceRepository.save(category);
-        return ResponseEntity.ok(updatedCategory);
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Integer id) {
-        if (!categorieServiceRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
+        try {
+            log.info("Deleting category with id: {}", id);
+            categorieServiceService.deleteCategory(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            log.error("Error deleting category with id {}: ", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        categorieServiceRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
-    
-    @GetMapping("/active")
-    public ResponseEntity<List<CategorieService>> getActiveCategories() {
-        List<CategorieService> activeCategories = categorieServiceRepository.findByStatusTrue();
-        return ResponseEntity.ok(activeCategories);
-    }
-    
-    @GetMapping("/search")
-    public ResponseEntity<List<CategorieService>> searchCategories(@RequestParam String searchTerm) {
-        List<CategorieService> categories = categorieServiceRepository.findByNameContainingIgnoreCase(searchTerm);
-        return ResponseEntity.ok(categories);
-    }
-    
-    @GetMapping("/count")
-    public ResponseEntity<Map<String, Object>> getCategoryCount() {
-        long totalCount = categorieServiceRepository.count();
-        long activeCount = categorieServiceRepository.countByStatusTrue();
-        
-        Map<String, Object> response = Map.of(
-            "totalCategories", totalCount,
-            "activeCategories", activeCount,
-            "inactiveCategories", totalCount - activeCount
-        );
-        
-        return ResponseEntity.ok(response);
-    }
-    
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<CategorieService> updateCategoryStatus(
-            @PathVariable Integer id, 
-            @RequestParam boolean status) {
-        return categorieServiceRepository.findById(id)
-                .map(category -> {
-                    category.setStatus(status);
-                    CategorieService updatedCategory = categorieServiceRepository.save(category);
-                    return ResponseEntity.ok(updatedCategory);
-                })
-                .orElse(ResponseEntity.notFound().build());
     }
 } 
