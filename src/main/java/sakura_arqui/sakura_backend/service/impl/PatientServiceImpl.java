@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sakura_arqui.sakura_backend.dto.PatientDto;
-import sakura_arqui.sakura_backend.dto.PatientResponseDto;
 import sakura_arqui.sakura_backend.exception.ResourceNotFoundException;
 import sakura_arqui.sakura_backend.model.DocumentType;
 import sakura_arqui.sakura_backend.model.District;
@@ -15,14 +14,14 @@ import sakura_arqui.sakura_backend.repository.DistrictRepository;
 import sakura_arqui.sakura_backend.repository.GenderRepository;
 import sakura_arqui.sakura_backend.repository.PatientRepository;
 import sakura_arqui.sakura_backend.service.PatientService;
-import sakura_arqui.sakura_backend.dto.DocumentTypeResponseDto;
-import sakura_arqui.sakura_backend.dto.GenderResponseDto;
-import sakura_arqui.sakura_backend.dto.DistrictResponseDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import sakura_arqui.sakura_backend.dto.DocumentTypeDto;
+import sakura_arqui.sakura_backend.dto.GenderDto;
+import sakura_arqui.sakura_backend.dto.DistrictDto;
 
 @Service
 @RequiredArgsConstructor
@@ -123,44 +122,44 @@ public class PatientServiceImpl implements PatientService {
     }
     
     // Métodos para convertir a DTOs
-    public List<PatientResponseDto> findAllAsDto() {
+    public List<PatientDto> findAllAsDto() {
         return patientRepository.findAll().stream()
-                .map(this::convertToResponseDto)
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
     
-    public Optional<PatientResponseDto> findByIdAsDto(Integer id) {
+    public Optional<PatientDto> findByIdAsDto(Integer id) {
         return patientRepository.findById(id)
-                .map(this::convertToResponseDto);
+                .map(this::convertToDto);
     }
     
-    public Optional<PatientResponseDto> findByDniAsDto(String dni) {
+    public Optional<PatientDto> findByDniAsDto(String dni) {
         return patientRepository.findByDni(dni)
-                .map(this::convertToResponseDto);
+                .map(this::convertToDto);
     }
     
-    public List<PatientResponseDto> findBySearchTermAsDto(String searchTerm) {
+    public List<PatientDto> findBySearchTermAsDto(String searchTerm) {
         return patientRepository.findBySearchTerm(searchTerm).stream()
-                .map(this::convertToResponseDto)
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
     
-    public List<PatientResponseDto> findRecentPatientsAsDto(int limit) {
+    public List<PatientDto> findRecentPatientsAsDto(int limit) {
         return patientRepository.findAll().stream()
                 .sorted((p1, p2) -> p2.getCreatedAt().compareTo(p1.getCreatedAt()))
                 .limit(limit)
-                .map(this::convertToResponseDto)
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
     
-    public PatientResponseDto createPatientAndReturnDto(PatientDto patientDto) {
+    public PatientDto createPatientAndReturnDto(PatientDto patientDto) {
         Patient patient = createPatient(patientDto);
-        return convertToResponseDto(patient);
+        return convertToDto(patient);
     }
     
-    public PatientResponseDto updateAndReturnDto(Integer id, PatientDto patientDto) {
+    public PatientDto updateAndReturnDto(Integer id, PatientDto patientDto) {
         Patient patient = update(id, patientDto);
-        return convertToResponseDto(patient);
+        return convertToDto(patient);
     }
     
     private void updatePatientFromDto(Patient patient, PatientDto patientDto) {
@@ -168,7 +167,7 @@ public class PatientServiceImpl implements PatientService {
         patient.setLastName(patientDto.getLastName());
         patient.setDni(patientDto.getDni());
         patient.setBirthDate(patientDto.getBirthDate());
-        patient.setPhoneNumber(patientDto.getPhone());
+        patient.setPhoneNumber(patientDto.getPhoneNumber());
         patient.setEmail(patientDto.getEmail());
         patient.setStatus(patientDto.getStatus() != null ? patientDto.getStatus() : true);
         
@@ -194,8 +193,8 @@ public class PatientServiceImpl implements PatientService {
         }
     }
     
-    private PatientResponseDto convertToResponseDto(Patient patient) {
-        PatientResponseDto dto = new PatientResponseDto();
+    private PatientDto convertToDto(Patient patient) {
+        PatientDto dto = new PatientDto();
         dto.setPatientId(patient.getPatientId());
         dto.setFirstName(patient.getFirstName());
         dto.setLastName(patient.getLastName());
@@ -205,39 +204,37 @@ public class PatientServiceImpl implements PatientService {
         dto.setEmail(patient.getEmail());
         dto.setStatus(patient.isStatus());
         dto.setCreatedAt(patient.getCreatedAt());
-        
-        // Convert document type
+        // Para entrada (no se usa en respuesta, pero por compatibilidad)
+        if (patient.getDocumentType() != null) dto.setDocumentTypeId(patient.getDocumentType().getDocumentTypeId());
+        if (patient.getGender() != null) dto.setGenderId(patient.getGender().getGenderId());
+        if (patient.getDistrict() != null) dto.setDistrictId(patient.getDistrict().getDistrictId());
+        // Para respuesta (objetos anidados)
         if (patient.getDocumentType() != null) {
-            DocumentTypeResponseDto docTypeDto = new DocumentTypeResponseDto(
-                patient.getDocumentType().getDocumentTypeId(),
-                patient.getDocumentType().getCode(),
-                patient.getDocumentType().getName(),
-                patient.getDocumentType().isStatus()
-            );
-            dto.setDocumentType(docTypeDto);
+            var documentType = patient.getDocumentType();
+            dto.setDocumentType(new DocumentTypeDto(
+                documentType.getDocumentTypeId(),
+                documentType.getCode(),
+                documentType.getName(),
+                documentType.isStatus()
+            ));
         }
-        
-        // Convert gender
         if (patient.getGender() != null) {
-            GenderResponseDto genderDto = new GenderResponseDto(
-                patient.getGender().getGenderId(),
-                patient.getGender().getCode(),
-                patient.getGender().getName(),
-                patient.getGender().isStatus()
-            );
-            dto.setGender(genderDto);
+            var gender = patient.getGender();
+            dto.setGender(new GenderDto(
+                gender.getGenderId(),
+                gender.getCode(),
+                gender.getName(),
+                gender.isStatus()
+            ));
         }
-        
-        // Convert district
         if (patient.getDistrict() != null) {
-            DistrictResponseDto districtDto = new DistrictResponseDto(
-                patient.getDistrict().getDistrictId(),
-                patient.getDistrict().getName(),
-                patient.getDistrict().isStatus()
-            );
-            dto.setDistrict(districtDto);
+            var district = patient.getDistrict();
+            dto.setDistrict(new DistrictDto(
+                district.getDistrictId(),
+                district.getName(),
+                district.isStatus()
+            ));
         }
-        
         return dto;
     }
 } 
