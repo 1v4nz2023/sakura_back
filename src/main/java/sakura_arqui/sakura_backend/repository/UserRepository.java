@@ -6,7 +6,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import sakura_arqui.sakura_backend.model.Rol;
 import sakura_arqui.sakura_backend.model.User;
-import sakura_arqui.sakura_backend.model.Employee;
 import sakura_arqui.sakura_backend.model.District;
 import sakura_arqui.sakura_backend.model.Gender;
 import sakura_arqui.sakura_backend.model.JobTitles;

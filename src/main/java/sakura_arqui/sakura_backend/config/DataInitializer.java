@@ -10,7 +10,6 @@ import sakura_arqui.sakura_backend.repository.*;
 import sakura_arqui.sakura_backend.repository.CategorieServiceRepository;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
