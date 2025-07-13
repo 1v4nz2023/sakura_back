@@ -1,11 +1,9 @@
 package sakura_arqui.sakura_backend.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import sakura_arqui.sakura_backend.model.User;
 
 import java.time.LocalDateTime;
 
