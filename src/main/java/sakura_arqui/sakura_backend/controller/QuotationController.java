@@ -36,4 +36,10 @@ public class QuotationController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/patient/{patientId}")
+    public ResponseEntity<List<QuotationDto>> getQuotationsByPatientId(@PathVariable Integer patientId) {
+        List<QuotationDto> quotations = quotationService.getQuotationsByPatientId(patientId);
+        return ResponseEntity.ok(quotations);
+    }
 } 

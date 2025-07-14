@@ -83,6 +83,13 @@ public class QuotationServiceImpl implements QuotationService {
                 .orElse(null);
     }
 
+    @Override
+    public List<QuotationDto> getQuotationsByPatientId(Integer patientId) {
+        return quotationRepository.findByPatientPatientId(patientId).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
     // Conversión de entidad a DTO
     private QuotationDto toDto(Quotation quotation) {
         QuotationDto dto = new QuotationDto();

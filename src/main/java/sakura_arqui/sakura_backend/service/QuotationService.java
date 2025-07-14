@@ -7,4 +7,5 @@ public interface QuotationService {
     QuotationDto createQuotation(QuotationDto quotationDto);
     List<QuotationDto> getAllQuotations();
     QuotationDto getQuotationById(Integer id);
+    List<QuotationDto> getQuotationsByPatientId(Integer patientId);
 } 
