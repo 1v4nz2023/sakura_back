@@ -50,6 +50,13 @@ public class Payment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "canceled_by")
     private User canceledBy;
+
+    // NUEVOS CAMPOS PARA DOCUMENTO DE IDENTIDAD
+    @Column(name = "document_type", length = 10)
+    private String documentType; // Ej: "DNI", "RUC"
+
+    @Column(name = "document_number", length = 20)
+    private String documentNumber; // Ej: "12345678" o "20123456789"
     
     public enum PaymentStatus {
         PENDIENTE, CONFIRMADO, ANULADO
