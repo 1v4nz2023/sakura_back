@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import sakura_arqui.sakura_backend.model.Payment;
+import sakura_arqui.sakura_backend.model.Quotation;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -40,4 +41,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     
     @Query("SELECT COUNT(p) FROM Payment p WHERE p.status = :status")
     Long countByStatus(@Param("status") Payment.PaymentStatus status);
+
+    List<Payment> findByQuotationAndStatus(Quotation quotation, Payment.PaymentStatus status);
 } 
