@@ -36,4 +36,10 @@ public class PaymentController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/patient/{patientId}")
+    public ResponseEntity<List<PaymentDto>> getPaymentsByPatientId(@PathVariable Integer patientId) {
+        List<PaymentDto> payments = paymentService.getPaymentsByPatientId(patientId);
+        return ResponseEntity.ok(payments);
+    }
 } 

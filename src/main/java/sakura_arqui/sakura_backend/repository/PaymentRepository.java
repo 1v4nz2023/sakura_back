@@ -43,4 +43,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Long countByStatus(@Param("status") Payment.PaymentStatus status);
 
     List<Payment> findByQuotationAndStatus(Quotation quotation, Payment.PaymentStatus status);
+    
+    @Query("SELECT p FROM Payment p WHERE p.quotation.patient.patientId = :patientId")
+    List<Payment> findByPatientId(@Param("patientId") Integer patientId);
 } 

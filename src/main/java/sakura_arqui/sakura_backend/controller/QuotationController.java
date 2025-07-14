@@ -70,4 +70,10 @@ public class QuotationController {
         List<QuotationDto> quotations = quotationService.getAllQuotations();
         return ResponseEntity.ok(quotations);
     }
+
+    @GetMapping("/patient/{patientId}")
+    public ResponseEntity<List<QuotationDto>> getQuotationsByPatientId(@PathVariable Integer patientId) {
+        List<QuotationDto> quotations = quotationService.getQuotationsByPatientId(patientId);
+        return ResponseEntity.ok(quotations);
+    }
 } 

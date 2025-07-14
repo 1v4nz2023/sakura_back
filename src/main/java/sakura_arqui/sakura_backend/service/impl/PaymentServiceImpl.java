@@ -74,6 +74,13 @@ public class PaymentServiceImpl implements PaymentService {
         return paymentRepository.findById(id).map(this::toDto).orElse(null);
     }
 
+    @Override
+    public List<PaymentDto> getPaymentsByPatientId(Integer patientId) {
+        return paymentRepository.findByPatientId(patientId).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
     private PaymentDto toDto(Payment payment) {
         PaymentDto dto = new PaymentDto();
         dto.setPaymentId(payment.getPaymentId());
