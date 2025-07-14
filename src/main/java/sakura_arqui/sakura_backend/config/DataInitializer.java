@@ -110,16 +110,16 @@ public class DataInitializer implements CommandLineRunner {
         log.info("Checking categories...");
         
         List<CategorieService> categories = Arrays.asList(
-            new CategorieService(null, "Diagnóstico", "Servicios de diagnóstico dental", true, new java.util.HashSet<>()),
-            new CategorieService(null, "Restaurativo", "Servicios restaurativos", true, new java.util.HashSet<>()),
-            new CategorieService(null, "Preventivo", "Servicios preventivos", true, new java.util.HashSet<>()),
-            new CategorieService(null, "Rehabilitación", "Servicios de rehabilitación", true, new java.util.HashSet<>()),
-            new CategorieService(null, "Endodoncia", "Servicios de endodoncia", true, new java.util.HashSet<>()),
-            new CategorieService(null, "Odontopediatría", "Servicios para niños", true, new java.util.HashSet<>()),
-            new CategorieService(null, "Cirugía", "Servicios quirúrgicos", true, new java.util.HashSet<>()),
-            new CategorieService(null, "Estética", "Servicios estéticos", true, new java.util.HashSet<>()),
-            new CategorieService(null, "Periodoncia", "Servicios periodontales", true, new java.util.HashSet<>()),
-            new CategorieService(null, "Otros", "Servicios Otros", true, new java.util.HashSet<>())
+            createCategory("Diagnóstico", "Servicios de diagnóstico dental"),
+            createCategory("Restaurativo", "Servicios restaurativos"),
+            createCategory("Preventivo", "Servicios preventivos"),
+            createCategory("Rehabilitación", "Servicios de rehabilitación"),
+            createCategory("Endodoncia", "Servicios de endodoncia"),
+            createCategory("Odontopediatría", "Servicios para niños"),
+            createCategory("Cirugía", "Servicios quirúrgicos"),
+            createCategory("Estética", "Servicios estéticos"),
+            createCategory("Periodoncia", "Servicios periodontales"),
+            createCategory("Otros", "Servicios Otros")
         );
         
         int createdCount = 0;
@@ -150,7 +150,7 @@ public class DataInitializer implements CommandLineRunner {
             CategorieService estetica = categorieServiceRepository.findByName("Estética").orElseThrow();
             CategorieService periodoncia = categorieServiceRepository.findByName("Periodoncia").orElseThrow();
             CategorieService otros = categorieServiceRepository.findByName("Otros").orElseThrow();
-            List<Service> services = Arrays.asList(
+            List<ServiceModel> services = Arrays.asList(
                 createService("Mock Up", "Prueba estética temporal para visualizar cambios.", new BigDecimal("25"), diagnostico),
                 createService("Diseño Digital", "Planificación digital de la sonrisa.", new BigDecimal("500"), diagnostico),
                 createService("Resina Simple", "Empaste básico para caries superficiales.", new BigDecimal("140"), restaurativo),
@@ -231,14 +231,22 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
     
-    private Service createService(String name, String description, BigDecimal basePrice, CategorieService category) {
-        Service service = new Service();
+    private ServiceModel createService(String name, String description, BigDecimal basePrice, CategorieService category) {
+        ServiceModel service = new ServiceModel();
         service.setName(name);
         service.setDescription(description);
         service.setBasePrice(basePrice);
         service.setStatus(true);
         service.setCategory(category);
         return service;
+    }
+    
+    private CategorieService createCategory(String name, String description) {
+        CategorieService category = new CategorieService();
+        category.setName(name);
+        category.setDescription(description);
+        category.setStatus(true);
+        return category;
     }
     
 } 

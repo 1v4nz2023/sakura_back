@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import sakura_arqui.sakura_backend.model.Service;
-import sakura_arqui.sakura_backend.repository.ServiceRepository;
+import sakura_arqui.sakura_backend.dto.ServiceDto;
+import sakura_arqui.sakura_backend.service.ServiceService;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,69 +15,67 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ServiceController {
     
-    private final ServiceRepository serviceRepository;
+    private final ServiceService serviceService;
     
     @GetMapping
-    public ResponseEntity<List<Service>> getAllServices() {
-        List<Service> services = serviceRepository.findAll();
+    public ResponseEntity<List<ServiceDto>> getAllServices() {
+        List<ServiceDto> services = serviceService.getAllServices();
         return ResponseEntity.ok(services);
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<Service> getServiceById(@PathVariable Integer id) {
-        return serviceRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ServiceDto> getServiceById(@PathVariable Integer id) {
+        ServiceDto service = serviceService.getServiceById(id);
+        if (service != null) {
+            return ResponseEntity.ok(service);
+        }
+        return ResponseEntity.notFound().build();
     }
     
     @PostMapping
-    public ResponseEntity<Service> createService(@RequestBody Service service) {
-        Service createdService = serviceRepository.save(service);
+    public ResponseEntity<ServiceDto> createService(@RequestBody ServiceDto serviceDto) {
+        ServiceDto createdService = serviceService.createService(serviceDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdService);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<Service> updateService(@PathVariable Integer id, @RequestBody Service service) {
-        if (!serviceRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<ServiceDto> updateService(@PathVariable Integer id, @RequestBody ServiceDto serviceDto) {
+        ServiceDto updatedService = serviceService.updateService(id, serviceDto);
+        if (updatedService != null) {
+            return ResponseEntity.ok(updatedService);
         }
-        service.setServiceId(id);
-        Service updatedService = serviceRepository.save(service);
-        return ResponseEntity.ok(updatedService);
+        return ResponseEntity.notFound().build();
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteService(@PathVariable Integer id) {
-        if (!serviceRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        serviceRepository.deleteById(id);
+        serviceService.deleteService(id);
         return ResponseEntity.noContent().build();
     }
     
     @GetMapping("/search")
-    public ResponseEntity<List<Service>> searchServices(@RequestParam String searchTerm) {
-        List<Service> services = serviceRepository.findBySearchTerm(searchTerm);
+    public ResponseEntity<List<ServiceDto>> searchServices(@RequestParam String searchTerm) {
+        List<ServiceDto> services = serviceService.searchServices(searchTerm);
         return ResponseEntity.ok(services);
     }
     
     @GetMapping("/price-range")
-    public ResponseEntity<List<Service>> getServicesByPriceRange(
+    public ResponseEntity<List<ServiceDto>> getServicesByPriceRange(
             @RequestParam BigDecimal minPrice, 
             @RequestParam BigDecimal maxPrice) {
-        List<Service> services = serviceRepository.findByBasePriceBetween(minPrice, maxPrice);
+        List<ServiceDto> services = serviceService.getServicesByPriceRange(minPrice, maxPrice);
         return ResponseEntity.ok(services);
     }
     
     @GetMapping("/max-price/{maxPrice}")
-    public ResponseEntity<List<Service>> getServicesByMaxPrice(@PathVariable BigDecimal maxPrice) {
-        List<Service> services = serviceRepository.findByBasePriceLessThanEqual(maxPrice);
+    public ResponseEntity<List<ServiceDto>> getServicesByMaxPrice(@PathVariable BigDecimal maxPrice) {
+        List<ServiceDto> services = serviceService.getServicesByMaxPrice(maxPrice);
         return ResponseEntity.ok(services);
     }
     
     @GetMapping("/min-price/{minPrice}")
-    public ResponseEntity<List<Service>> getServicesByMinPrice(@PathVariable BigDecimal minPrice) {
-        List<Service> services = serviceRepository.findByBasePriceGreaterThanEqualOrderByBasePriceAsc(minPrice);
+    public ResponseEntity<List<ServiceDto>> getServicesByMinPrice(@PathVariable BigDecimal minPrice) {
+        List<ServiceDto> services = serviceService.getServicesByMinPrice(minPrice);
         return ResponseEntity.ok(services);
     }
 } 
